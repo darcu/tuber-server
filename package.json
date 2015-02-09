@@ -1,0 +1,15 @@
+{
+  "name": "tuber-server",
+  "version": "0.0.1",
+  "description": "The server for the music share project",
+  "main": "Gruntfile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Lucian Parfeni - darcu.ro@gmail.com ",
+  "license": "ISC",
+  "dependencies": {
+    "restify": "^2.8.5",
+    "save": "^2.0.0"
+  }
+}
