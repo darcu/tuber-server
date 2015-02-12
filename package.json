@@ -9,7 +9,13 @@
   "author": "Lucian Parfeni - darcu.ro@gmail.com ",
   "license": "ISC",
   "dependencies": {
+    "colors": "^1.0.3",
+    "nano": "^6.0.2",
     "restify": "^2.8.5",
     "save": "^2.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:darcu/tuber-server.git"
   }
 }
