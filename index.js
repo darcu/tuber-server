@@ -1,15 +1,11 @@
-var colors = require('colors');
-
+var colors = require('colors'); // command line colors, fully optional
 
 var http = require('http');
-var restify = require('restify');
-var listData = require('save')('lists');
+var restify = require('restify'); // api lib
+var nano = require('nano')('http://localhost:5984'); // couchdb lib
+var cdb = nano.db;
 
 var port = 5454;
-
-
-var nano = require('nano')('http://localhost:5984');
-var cdb = nano.db;
 
 var musicList;
 
@@ -17,16 +13,16 @@ cdb.list(function(err, body) {
 	body.forEach(function(db) {
 		if (db === 'music') {
 			musicList = cdb.use('music');
+			dbReady();
 		}
 	});
 
 	if (!musicList) {
 		cdb.create('music', function() {
 			cdb.use('music');
+			dbReady();
 		});
 	}
-
-	dbReady();
 });
 
 
