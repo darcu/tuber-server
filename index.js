@@ -99,7 +99,7 @@ function dbReady() {
 		.use(restify.bodyParser());
 
 
-	server.post('/list/get', function(req, res, next) {
+	server.post('/api/list/get', function(req, res, next) {
 		console.log('get list', listData.list);
 
 		if (listData && listData.list) {
@@ -113,7 +113,7 @@ function dbReady() {
 		}
 	});
 
-	server.post('/list/add', function(req, res, next) {
+	server.post('/api/list/add', function(req, res, next) {
 		console.log('add list', req.params.id);
 
 		if (listData && listData.list && req.params.id) {
@@ -128,7 +128,7 @@ function dbReady() {
 		}
 	});
 
-	server.post('/list/drop', function(req, res, next) {
+	server.post('/api/list/drop', function(req, res, next) {
 		console.log('drop list', req.params.id);
 
 		if (listData && listData.list && req.params.id) {
