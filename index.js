@@ -1,145 +1,66 @@
 var colors = require('colors'); // command line colors, fully optional
-
 var http = require('http');
 var restify = require('restify'); // api lib
-var nano = require('nano')('http://localhost:5984'); // couchdb lib
-var cdb = nano.db;
+
+var list = require('./list.js');
 
 var port = 5454;
 
-var musicList;
+var server = restify.createServer({
+	name: 'tuber'
+});
 
-cdb.list(function(err, body) {
-	body.forEach(function(db) {
-		if (db === 'music') {
-			musicList = cdb.use('music');
-			dbReady();
-		}
-	});
+server.listen(port, function() {
+	console.log(colors.green('listening on port ' + port + '\n'));
+});
 
-	if (!musicList) {
-		cdb.create('music', function() {
-			cdb.use('music');
-			dbReady();
+server
+// .use(restify.CORS())
+	.use(restify.fullResponse())
+	.use(restify.bodyParser());
+
+
+server.post('/api/list/get', function(req, res, next) {
+	console.log(list.getData());
+	console.log('get list', list.getData().vids);
+
+	if (list.getData() && list.getData().vids) {
+		res.send(200, {
+			success: true,
+			name: list.getData()._id,
+			list: list.getData().vids
+		});
+	} else {
+		res.send(404);
+	}
+});
+
+server.post('/api/list/add', function(req, res, next) {
+	console.log('add list', req.params.id);
+
+	if (list.getData() && list.getData().vids && req.params.id) {
+		list.add(req.params.id, function(err) {
+			res.send(201, {
+				success: true,
+				name: list.getData()._id,
+				list: list.getData().vids,
+				added: req.params.id
+			});
 		});
 	}
 });
 
+server.post('/api/list/drop', function(req, res, next) {
+	console.log('drop list', req.params.id);
 
-function dbReady() {
-	var vids = [
-		'A_q5bdrelvI',
-		'Jcu1AHaTchM',
-		'5OVvJOeUdUs',
-		'Zh3VENebCgk'
-	];
-
-	var listData = {
-		list: vids
-	};
-
-	function update(callback) {
-		musicList.insert(listData, 'default', function(err, body) {
-			if (err) {
-				console.log('pula');
-				callback(err);
-				return;
-			}
-
-			callback && callback(null);
-		});
-	}
-
-	function getDefaultList(callback) {
-		musicList.get('default', {}, function(err, body) {
-			if (err) {
-				if (err.statusCode === 404) {
-					update(getDefaultList);
-					return;
-				}
-			}
-
-			listData = body;
-			callback && callback();
-		});
-	}
-
-	function addToList(vidID, callback) {
-		listData.list.push(vidID);
-		update(callback);
-	}
-
-	function removeFromList(vidID, callback) {
-		var index = listData.list.indexOf(vidID);
-		if (index !== -1) {
-			listData.list.splice(index, 1);
-			update(callback);
-		} else {
-			callback && callback('not found');
-		}
-	}
-
-	getDefaultList();
-
-	/**
-	 *
-	 * server
-	 *
-	 */
-
-	var server = restify.createServer({
-		name: 'tuber'
-	});
-	server.listen(port, function() {
-		console.log(colors.green('listening on port ' + port + '\n'));
-	});
-
-	server
-		.use(restify.fullResponse())
-		.use(restify.bodyParser());
-
-
-	server.post('/api/list/get', function(req, res, next) {
-		console.log('get list', listData.list);
-
-		if (listData && listData.list) {
-			res.send(200, {
+	if (list.getData() && list.getData().vids && req.params.id) {
+		list.remove(req.params.id, function(err) {
+			res.send(201, {
 				success: true,
-				name: listData._id,
-				list: listData.list
+				name: list.getData()._id,
+				list: list.getData().vids,
+				added: req.params.id
 			});
-		} else {
-			res.send(404);
-		}
-	});
-
-	server.post('/api/list/add', function(req, res, next) {
-		console.log('add list', req.params.id);
-
-		if (listData && listData.list && req.params.id) {
-			addToList(req.params.id, function(err) {
-					res.send(201, {
-					success: true,
-					name: listData._id,
-					list: listData.list,
-					added: req.params.id
-				});
-			});
-		}
-	});
-
-	server.post('/api/list/drop', function(req, res, next) {
-		console.log('drop list', req.params.id);
-
-		if (listData && listData.list && req.params.id) {
-			removeFromList(req.params.id, function(err) {
-				res.send(201, {
-					success: true,
-					name: listData._id,
-					list: listData.list,
-					added: req.params.id
-				});
-			});
-		}
-	});
-}
+		});
+	}
+});
