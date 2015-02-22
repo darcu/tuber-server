@@ -10,40 +10,44 @@ var server = restify.createServer({
 	name: 'tuber'
 });
 
+function log(endpoint, message) {
+	console.log(colors.green(endpoint) + '\n' + colors.white(message) + '\n');
+}
+
 server.listen(port, function() {
-	console.log(colors.green('listening on port ' + port + '\n'));
+	log('listening on port', 5454)
 });
 
 server
-// .use(restify.CORS())
 	.use(restify.fullResponse())
 	.use(restify.bodyParser());
 
 
 server.post('/api/list/get', function(req, res, next) {
-	console.log(list.getData());
-	console.log('get list', list.getData().vids);
+	log('list/get', req.params.userId);
 
-	if (list.getData() && list.getData().vids) {
-		res.send(200, {
-			success: true,
-			name: list.getData()._id,
-			list: list.getData().vids
-		});
-	} else {
-		res.send(404);
-	}
+	list.getData(req.params.userId, function(user, data) {
+		if (data.vids) {
+			res.send(200, {
+				success: true,
+				name: data._id,
+				list: data.vids
+			});
+		} else {
+			res.send(404);
+		}
+	});
 });
 
 server.post('/api/list/add', function(req, res, next) {
-	console.log('add list', req.params.id);
+	log('list/add', req.params.id);
 
-	if (list.getData() && list.getData().vids && req.params.id) {
-		list.add(req.params.id, function(err) {
+	if (req.params.id) {
+		list.add(req.params.userId, req.params.id, function(user, data) {
 			res.send(201, {
 				success: true,
-				name: list.getData()._id,
-				list: list.getData().vids,
+				name: data._id,
+				list: data.vids,
 				added: req.params.id
 			});
 		});
@@ -51,14 +55,14 @@ server.post('/api/list/add', function(req, res, next) {
 });
 
 server.post('/api/list/drop', function(req, res, next) {
-	console.log('drop list', req.params.id);
+	log('list/drop', req.params.id);
 
-	if (list.getData() && list.getData().vids && req.params.id) {
-		list.remove(req.params.id, function(err) {
+	if (req.params.id) {
+		list.remove(req.params.userId, req.params.id, function(user, data) {
 			res.send(201, {
 				success: true,
-				name: list.getData()._id,
-				list: list.getData().vids,
+				name: data._id,
+				list: data.vids,
 				added: req.params.id
 			});
 		});
@@ -66,5 +70,10 @@ server.post('/api/list/drop', function(req, res, next) {
 });
 
 server.post('/api/user/login', function(req, res, next) {
-	console.log('user login', req.params);
+	log('user/login', req.params.userId);
+
+	res.send(200, {
+		success: true,
+		message: 'user login successful'
+	});
 });

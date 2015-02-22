@@ -21,7 +21,7 @@ cdb.list(function(err, body) {
 
 
 function dbReady() {
-	var data = {
+	var dData = {
 		vids: [
 			'A_q5bdrelvI',
 			'Jcu1AHaTchM',
@@ -30,54 +30,55 @@ function dbReady() {
 		]
 	};
 
-	function getFullList() {
-		return data;
-	}
-
-	function update(callback) {
-		musicList.insert(data, 'default', function(err, body) {
+	function update(user, data, callback) {
+		musicList.insert(data, user || 'default', function(err, body) {
 			if (err) {
 				console.log('pula');
 				callback(err);
 				return;
 			}
 
-			callback && callback(null);
+			callback && callback(user, body);
 		});
 	}
 
-	function getDefaultList(callback) {
-		musicList.get('default', {}, function(err, body) {
+	function getList(user, callback) {
+		musicList.get(user, {}, function(err, body) {
 			if (err) {
 				if (err.statusCode === 404) {
-					update(getDefaultList);
+					update(user, dData, callback);
 					return;
 				}
 			}
 
-			data = body;
-			callback && callback();
+			callback && callback(user, body);
 		});
 	}
 
-	function addToList(vidID, callback) {
-		data.vids.push(vidID);
-		update(callback);
+	function getDefaultList(callback) {
+		getList('default', callback);
 	}
 
-	function removeFromList(vidID, callback) {
-		var index = data.vids.indexOf(vidID);
-		if (index !== -1) {
-			data.vids.splice(index, 1);
-			update(callback);
-		} else {
-			callback && callback('not found');
-		}
+	function addToList(user, vidID, callback) {
+		getList(user, function(err, body) {
+			body.vids.push(vidID);
+			update(user, body, callback);
+		});
 	}
 
-	getDefaultList();
+	function removeFromList(user, vidID, callback) {
+		getList(user, function(err, body) {
+			var index = body.vids.indexOf(vidID);
+			if (index !== -1) {
+				body.vids.splice(index, 1);
+				update(user, body, callback);
+			} else {
+				callback && callback('not found');
+			}
+		});
+	}
 
-	exports.getData = getFullList;
+	exports.getData = getList;
 	exports.add = addToList;
 	exports.remove = removeFromList;
 }
