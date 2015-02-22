@@ -64,3 +64,7 @@ server.post('/api/list/drop', function(req, res, next) {
 		});
 	}
 });
+
+server.post('/api/user/login', function(req, res, next) {
+	console.log('user login', req.params);
+});
