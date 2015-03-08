@@ -49,9 +49,9 @@ function dbReady() {
 					update(user, dData, callback);
 					return;
 				}
+			} else {
+				callback && callback(user, body);
 			}
-
-			callback && callback(user, body);
 		});
 	}
 
