@@ -4,9 +4,9 @@ var restify = require('restify'); // api lib
 
 var list = require('./list.js');
 
-var port = 5454;
 
-var server = restify.createServer({
+var port = 5454;
+var app = restify.createServer({
 	name: 'tuber'
 });
 
@@ -14,16 +14,17 @@ function log(endpoint, message) {
 	console.log(colors.green(endpoint) + '\n' + colors.white(message) + '\n');
 }
 
-server.listen(port, function() {
-	log('listening on port', 5454)
-});
+app.listen(port, () => log('listening on port', 5454));
+app.use(restify.CORS({
+	origins: ['http://localhost:8080'], // defaults to ['*']
+	credentials: true, // defaults to false
+	headers: ['X-Requested-With']
+}));
+app.use(restify.fullResponse());
+app.use(restify.bodyParser());
 
-server
-	.use(restify.fullResponse())
-	.use(restify.bodyParser());
 
-
-server.post('/api/list/get', function(req, res, next) {
+app.post('/api/list/get', function(req, res, next) {
 	log('list/get', req.params.userId);
 
 	list.getData(req.params.userId, function(user, data) {
@@ -39,7 +40,7 @@ server.post('/api/list/get', function(req, res, next) {
 	});
 });
 
-server.post('/api/list/add', function(req, res, next) {
+app.post('/api/list/add', function(req, res, next) {
 	log('list/add', req.params.id);
 
 	if (req.params.id) {
@@ -54,7 +55,7 @@ server.post('/api/list/add', function(req, res, next) {
 	}
 });
 
-server.post('/api/list/drop', function(req, res, next) {
+app.post('/api/list/drop', function(req, res, next) {
 	log('list/drop', req.params.id);
 
 	if (req.params.id) {
@@ -69,7 +70,7 @@ server.post('/api/list/drop', function(req, res, next) {
 	}
 });
 
-server.post('/api/user/login', function(req, res, next) {
+app.post('/api/user/login', function(req, res, next) {
 	log('user/login', req.params.userId);
 
 	res.send(200, {
