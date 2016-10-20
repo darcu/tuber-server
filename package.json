@@ -1,6 +1,6 @@
 {
   "name": "tuber-server",
-  "version": "0.0.1",
+  "version": "2.0.0",
   "description": "The server for the music share project",
   "main": "Gruntfile.js",
   "scripts": {
