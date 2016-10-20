@@ -1,10 +1,17 @@
-var nano = require('nano')('http://localhost:5984'); // couchdb lib
-var cdb = nano.db;
+const nano = require('nano')('http://localhost:5984'); // couchdb lib
+const cdb = nano.db;
 
-var musicList;
+const log = require('./util.js').log;
 
-cdb.list(function(err, body) {
-	body.forEach(function(db) {
+const musicList;
+
+cdb.list((err, body) => {
+	if (err) {
+		log("db", err);
+		return;
+	}
+
+	body.forEach((db) => {
 		if (db === 'music') {
 			musicList = cdb.use('music');
 			dbReady();
@@ -12,7 +19,7 @@ cdb.list(function(err, body) {
 	});
 
 	if (!musicList) {
-		cdb.create('music', function() {
+		cdb.create('music', () => {
 			cdb.use('music');
 			dbReady();
 		});
