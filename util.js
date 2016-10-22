@@ -1,10 +1,17 @@
-var chalk = require('chalk'); // command line colors, fully optional
+const chalk = require('chalk');
+const shortid = require("shortid");
 
 
 module.exports = {
-    log: (endpoint, message) => {
-      console.log(chalk.green(endpoint), message);
-    }
+  log: (endpoint, ...data) => {
+    console.log("\n\n", chalk.green(endpoint + ":"), ...data);
+  },
+
+  error: (err, ...data) => {
+    console.log("\n\n", chalk.red(err + ":"), ...data);
+  },
+
+  generateId: shortid.generate,
+
+  isDebug: true
 }
-
-

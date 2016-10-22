@@ -1,0 +1,14 @@
+{
+  "user[id]": {
+    "lists": ["listId"]
+  },
+  "list[id]": {
+    "listId",
+    "title",
+    "songs"
+  },
+  "songs": [{
+    "id",
+    "url"
+  }]
+}
