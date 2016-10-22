@@ -21,7 +21,7 @@ app.get("/", (req, res) => res.send("Tuber Server Documentation (coming...)"));
 
 const validate = (res, ...params) => {
   if (params.some(param => !param)) {
-    res.status(500).send("Invalid parameters");
+    res.status(400).send("Invalid parameters");
     return false;
   }
 
@@ -29,49 +29,38 @@ const validate = (res, ...params) => {
 };
 
 
-const handle = (res) => (err, result) => {
-  if (err) {
-    res.status(500).send({err, message: "PULA"})
-    return;
-  }
+const handle = (res, okStatus = 200) => (err, result) => {
+  if (err) return res.status(520).send({err});
 
-  res.status(200).send(result);
+  res.status(okStatus).send(result);
 }
 
 app.route("/list")
   .get((req, res) => db.getAllLists(handle(res)))
   .post((req, res) => {
     const title = req.body.title;
-    if (!validate(res, title)) {
-      return;
-    }
+    if (!validate(res, title)) return;
 
-    db.addList(handle(res), title);
+    db.addList(handle(res, 201), title);
   });
 
 app.route("/list/:id")
   .get((req, res) => {
     const id = req.params.id;
-    if (!validate(res, id)) {
-      return;
-    }
+    if (!validate(res, id)) return;
 
     db.getList(handle(res), req.params.id);
   })
-  .post((req, res) => {
+  .patch((req, res) => {
     const id = req.params.id;
     const title = req.body.title;
-    if (!validate(res, id, title)) {
-      return;
-    }
+    if (!validate(res, id, title)) return;
 
     db.updateList(handle(res), id, title);
   })
   .delete((req, res) => {
     const id = req.params.id;
-    if (!validate(res, id)) {
-      return;
-    }
+    if (!validate(res, id)) return;
   
     db.deleteList(handle(res), id);
   });
@@ -80,23 +69,18 @@ app.route("/list/:id/song")
   .post((req, res) => {
     const id = req.params.id;
     const url = req.body.url;
+    if (!validate(res, id, url)) return;
 
-    if (!validate(res, id, url)) {
-      return;
-    }
-
-    db.addToList(handle(res), id, url);
+    db.addToList(handle(res, 201), id, url);
   });
 
 app.route("/list/:id/song/:songId")
   .delete((req, res) => {
     const id = req.params.id;
     const songId = req.params.songId;
-    if (!validate(res, id, songId)) {
-      return;
-    }
+    if (!validate(res, id, songId)) return;
   
     db.removeFromList(handle(res), id, songId);
   });
 
-module.exports = {init};  
+module.exports = {init};

@@ -8,10 +8,7 @@ let listCollections = null;
 
 const init = (cb) => {
   MongoClient.connect(dbURL, (err, dbase) => {
-    if (err) {
-      cb(err);
-      return;
-    }
+    if (err) return cb(err);
 
     db = dbase;
     listCollections = db.collection("lists");
@@ -26,9 +23,7 @@ const addList = (cb, title) => {
     title,
     songs: []
   }, (err, result) => {
-    if (err) {
-      cb("DB ERROR: Can't create list");
-    }
+    if (err) return cb(err);
 
     cb(null, result.ops[0]);
   });
@@ -36,9 +31,7 @@ const addList = (cb, title) => {
 
 const updateList = (cb, id, title) => {
   listCollections.update({id}, {$set: {title}}, (err, results) => {
-    if (err) {
-      cb("DB ERROR: Can't update list");
-    }
+    if (err) return cb(err);
 
     listLists();
     cb(null, results.result);
@@ -47,9 +40,7 @@ const updateList = (cb, id, title) => {
 
 const addToList = (cb, id, url) => {
   listCollections.update({id}, {$push: {songs: {id: generateId(), url}}}, (err, results) => {
-    if (err) {
-      cb("DB ERROR: Can't update list");
-    }
+    if (err) return cb(err);
 
     listSongs(id);
     listLists();
@@ -59,9 +50,7 @@ const addToList = (cb, id, url) => {
 
 const removeFromList = (cb, id, songId) => {
   listCollections.update({id}, {$pull: {songs: {id: songId}}}, (err, results) => {
-    if (err) {
-      cb("DB ERROR: Can't update list");
-    }
+    if (err) return cb(err);
 
     setTimeout(() => {
       listSongs(id);
@@ -73,9 +62,7 @@ const removeFromList = (cb, id, songId) => {
 
 const getAllLists = (cb) => {
   listCollections.find({}).toArray((err, result) => {
-    if (err) { 
-      cb(err);
-    }
+    if (err) return cb(err);
 
     listLists();
     cb(null, result);
@@ -84,9 +71,7 @@ const getAllLists = (cb) => {
 
 const getList = (cb, id) => {
   listCollections.findOne({id}, (err, result) => {
-    if (err) {
-      cb(err);
-    }
+    if (err) return cb(err);
 
     listLists();
     cb(null, result);
@@ -95,9 +80,7 @@ const getList = (cb, id) => {
 
 const deleteList = (cb, id) => {
   listCollections.remove({id}, (err, result) => {
-    if (err) {
-      cb(err);
-    }
+    if (err) return cb(err);
 
     listLists();
     cb(null, result.result);
